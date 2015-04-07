@@ -1,0 +1,65 @@
+#:kivy 1.7.2
+
+<PivotGame>:
+    ball: pivot_ball
+    menu: menu_label
+    score_label: score_label
+    score_label2: score_label2
+    target: pivot_target
+
+    canvas:
+        Rectangle:
+            pos: 0, 0
+            size: 10, self.height
+        Rectangle:
+            pos: self.width - 10, 0
+            size: 10, self.height
+        Rectangle:
+            pos: 0, 0
+            size: self.width, 10
+        Rectangle:
+            pos: 0, self.height - 10
+            size: self.width, 10
+
+    PivotBall:
+        id: pivot_ball
+        center: self.parent.center_x, self.parent.center_y
+
+    PivotTarget:
+        id: pivot_target
+        center: self.parent.center_x, self.parent.center_y
+
+    Label:
+        id: menu_label
+        font_size: 70
+        text: "To Start Press Space"
+        center: self.parent.center_x, self.parent.center_y
+
+    Label:
+        id: score_label
+        font_size: 70
+        text: "Score"
+        center: self.parent.center_x, self.parent.center_y + self.font_size
+
+    Label:
+        id: score_label2
+        font_size: 20
+        text: "Score: 0"
+
+<PivotBall>:
+    size: 50, 50
+
+    canvas:
+        Ellipse:
+            pos: self.x, self.y
+            size: self.size
+
+<PivotTarget>:
+    size: 50, 50
+
+    canvas:
+        Color:
+            rgb: 1,0,0
+        Ellipse:
+            pos: self.x, self.y
+            size: self.size
