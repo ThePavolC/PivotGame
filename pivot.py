@@ -4,7 +4,7 @@ from kivy.properties import NumericProperty, ReferenceListProperty, ObjectProper
 from kivy.vector import Vector
 from kivy.clock import Clock
 from kivy.core.window import Window
-from kivy.graphics import Color, Ellipse
+from kivy.graphics import Color, Ellipse, Rectangle
 from math import sin, cos, sqrt
 from random import randint
 
@@ -21,6 +21,10 @@ class PivotGame(Widget):
     state = OptionProperty("started", options=["playing","killed"])
     # Score counter
     score = NumericProperty(-1)
+
+    number_of_opponents = [2,3,5,7,11,13,17,19,23,29,31,37,41,43]
+    level = 0
+    opponents = []
 
     def update(self, dt):
         """Run the game
@@ -48,6 +52,8 @@ class PivotGame(Widget):
             if self.ball.is_touching(self.target):
                 self.target.move()
                 self.score += 1
+                if self.score % 5 == 0:
+                    self.level += 1
 
             self.menu.canvas.opacity = 0
             self.ball.canvas.opacity = 1
@@ -56,6 +62,13 @@ class PivotGame(Widget):
             self.ball.move(dt)
             self.set_score(self.score)
 
+            for o in self.opponents:
+                if self.ball.is_touching(o):
+                    self.state = "killed"
+                    print self.ball.pos, self.ball.size
+                    print o.pos, o.size
+                o.move()
+
         elif self.state == "killed":
             self.menu.canvas.opacity = 1
             self.ball.canvas.opacity = 0
@@ -63,6 +76,22 @@ class PivotGame(Widget):
             self.score_label.canvas.opacity = 1
             self.target.canvas.opacity = 0
             self.target.move()
+
+            for o in self.opponents:
+                self.remove_widget(o)
+            self.opponents = []
+
+    def update_opponent(self, dt):
+        if self.state == "started":
+            pass
+        elif self.state == "playing":
+            if len(self.opponents) < self.number_of_opponents[self.level]:
+                p = (-50,randint(0,self.parent.height))
+                temp_op = PivotOpponent(pos=p, size=(50,50))
+                self.add_widget(temp_op,9999)
+                self.opponents.append(temp_op)
+        elif self.state == "killed":
+            pass
 
     def set_score(self, num):
         """Set score on label in corner and label at the end"""
@@ -80,6 +109,8 @@ class PivotApp(App):
         self.game = PivotGame()
 
         Clock.schedule_interval(self.game.update, 1.0/30.0)
+
+        Clock.schedule_interval(self.game.update_opponent, 5.0)
 
         self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
         self._keyboard.bind(on_key_down = self._on_keyboard_down)
@@ -167,6 +198,21 @@ class PivotTarget(Widget):
                                 self.parent.width - self.size[0] - i)
         self.y = randint(self.size[0] + i,
                                 self.parent.height - self.size[0] - i)
+
+class PivotOpponent(Widget):
+
+    speed = NumericProperty(5)
+
+    def move(self):
+        if (self.x - self.size[0] > self.parent.width or
+            self.x + self.size[0] < 0):
+            self.x -= self.speed
+            self.speed *= -1
+            self.y = randint(0,self.parent.height)
+
+        self.x += self.speed
+
+
 
 if __name__ == '__main__':
     PivotApp().run()

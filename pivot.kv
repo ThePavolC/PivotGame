@@ -8,6 +8,8 @@
     target: pivot_target
 
     canvas:
+        Color:
+            rgb: 1,1,1
         Rectangle:
             pos: 0, 0
             size: 10, self.height
@@ -50,6 +52,8 @@
     size: 50, 50
 
     canvas:
+        Color:
+            rgb: 1,1,1
         Ellipse:
             pos: self.x, self.y
             size: self.size
@@ -63,3 +67,12 @@
         Ellipse:
             pos: self.x, self.y
             size: self.size
+
+<PivotOpponent>:
+
+    canvas:
+        Color:
+            rgb: 0,1,0
+        Rectangle:
+            pos: self.x, self.y
+            size: 50,50
