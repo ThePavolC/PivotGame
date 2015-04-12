@@ -5,7 +5,7 @@ from kivy.vector import Vector
 from kivy.clock import Clock
 from kivy.core.window import Window
 from kivy.graphics import Color, Ellipse
-from math import sin, cos
+from math import sin, cos, sqrt
 from random import randint
 
 class PivotGame(Widget):
@@ -45,8 +45,8 @@ class PivotGame(Widget):
 
         elif self.state == "playing":
 
-            if self.got_point():
-                self.move_target()
+            if self.ball.is_touching(self.target):
+                self.target.move()
                 self.score += 1
 
             self.menu.canvas.opacity = 0
@@ -62,23 +62,7 @@ class PivotGame(Widget):
             self.set_score(self.score)
             self.score_label.canvas.opacity = 1
             self.target.canvas.opacity = 0
-            self.move_target()
-
-    def move_target(self):
-        """Move target ball within the window"""
-        i = 10
-        self.target.x = randint(self.target.size[0] + i,
-                                self.parent.width - self.target.size[0] - i)
-        self.target.y = randint(self.target.size[0] + i,
-                                self.parent.height - self.target.size[0] - i)
-
-    def got_point(self):
-        """Check if ball touch target"""
-        if (self.ball.pos[0] <= self.target.pos[0] + self.target.size[0] and
-            self.ball.pos[0] >= self.target.pos[0] - self.target.size[0] and
-            self.ball.pos[1] <= self.target.pos[1] + self.target.size[1] and
-            self.ball.pos[1] >= self.target.pos[1] - self.target.size[1] ):
-            return True
+            self.target.move()
 
     def set_score(self, num):
         """Set score on label in corner and label at the end"""
@@ -149,6 +133,16 @@ class PivotBall(Widget):
         else:
             return False
 
+    def is_touching(self, other_object):
+        """Check if ball and target center are in touching distance"""
+        dist = sqrt((self.center[0] - other_object.center[0]) ** 2 +
+                    (self.center[1] - other_object.center[1]) ** 2)
+        touch_dist_x = self.size[0] / 2 + other_object.size[0] / 2
+        touch_dist_y = self.size[1] / 2 + other_object.size[1] / 2
+
+        if (dist < touch_dist_x or dist < touch_dist_y):
+            return True
+
     def move(self, dt):
         """Move ball in circle"""
         if self.was_turn:
@@ -165,7 +159,14 @@ class PivotBall(Widget):
 
 class PivotTarget(Widget):
     """Target ball that player is chasing"""
-    pass
+
+    def move(self):
+        """Move target ball within the window"""
+        i = 10
+        self.x = randint(self.size[0] + i,
+                                self.parent.width - self.size[0] - i)
+        self.y = randint(self.size[0] + i,
+                                self.parent.height - self.size[0] - i)
 
 if __name__ == '__main__':
     PivotApp().run()
