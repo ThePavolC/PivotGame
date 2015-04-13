@@ -21,20 +21,24 @@ class PivotGame(Widget):
     state = OptionProperty("started", options=["playing","killed"])
     # Score counter
     score = NumericProperty(-1)
-
+    # number of opponents show in window, something like difficulty
     number_of_opponents = [2,3,5,7,11,13,17,19,23,29,31,37,41,43]
+    # current level or difficulty
     level = 0
+    # list of opponents, so I can move them or check for collision
     opponents = []
 
     def update(self, dt):
         """Run the game
 
         It does:
-            - checks if ball is touch wall
+            - checks if ball is touching wall
+            - checks if ball is touching opponents
             - show labels based on game state
             - moves the ball
             - moves the target
             - counts score
+            - adds up level
         """
 
         if self.ball.is_touching_border():
@@ -52,6 +56,7 @@ class PivotGame(Widget):
             if self.ball.is_touching(self.target):
                 self.target.move()
                 self.score += 1
+                # increasing game level
                 if self.score % 5 == 0:
                     self.level += 1
 
@@ -62,11 +67,10 @@ class PivotGame(Widget):
             self.ball.move(dt)
             self.set_score(self.score)
 
+            # moving all opponents and checking if collided with player
             for o in self.opponents:
                 if self.ball.is_touching(o):
                     self.state = "killed"
-                    print self.ball.pos, self.ball.size
-                    print o.pos, o.size
                 o.move()
 
         elif self.state == "killed":
@@ -77,11 +81,13 @@ class PivotGame(Widget):
             self.target.canvas.opacity = 0
             self.target.move()
 
+            # removing all opponents
             for o in self.opponents:
                 self.remove_widget(o)
             self.opponents = []
 
     def update_opponent(self, dt):
+        """Adds opponent to game"""
         if self.state == "started":
             pass
         elif self.state == "playing":
@@ -200,10 +206,12 @@ class PivotTarget(Widget):
                                 self.parent.height - self.size[0] - i)
 
 class PivotOpponent(Widget):
+    """Opponents, boxes, which player should avoid"""
 
     speed = NumericProperty(5)
 
     def move(self):
+        """Move opponent from side to side. And then change it's y axis."""
         if (self.x - self.size[0] > self.parent.width or
             self.x + self.size[0] < 0):
             self.x -= self.speed
