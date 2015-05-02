@@ -151,6 +151,10 @@ class PivotBall(Widget):
     r = NumericProperty(5.5)
     was_turn = BooleanProperty(True)
     border = NumericProperty(10)
+    # list of 10 locations is stored and then shades are put to those locations
+    number_of_storing_locations = 10
+    previous_locations = []
+    shades = []
 
     def reset_position(self):
         """Reset ball to center and initial behaviour"""
@@ -158,6 +162,11 @@ class PivotBall(Widget):
         self.y = self.parent.center_y
         self.was_turn = BooleanProperty(True)
         self.angle = 0
+
+        for shade in self.shades:
+            self.canvas.remove(shade)
+        self.shades = []
+        self.previous_locations = []
 
     def is_touching_border(self):
         """Check if ball is touching border"""
@@ -189,6 +198,27 @@ class PivotBall(Widget):
         self.x = self.x + sin(self.angle) * self.r
         self.y = self.y + cos(self.angle) * self.r
 
+        self.add_shade()
+
+    def add_shade(self):
+        """Adding semitransparent shades to previous ball's locations"""
+        if len(self.previous_locations) > self.number_of_storing_locations:
+            # this will prevent locations list to go over
+            self.previous_locations.pop()
+
+            for loc_idx, location in enumerate(self.previous_locations):
+                if len(self.shades) > self.number_of_storing_locations:
+                    # this will remove old shades, those which are at the end
+                    last_shade = self.shades.pop()
+                    self.canvas.remove(last_shade)
+
+                with self.canvas:
+                    e_size_x = self.size[0] / (loc_idx+1) + 20
+                    e_size_y = self.size[1] / (loc_idx+1) + 20
+                    Color(1,1,1,loc_idx * 0.1)
+                    e = Ellipse(pos=location,size=(e_size_x, e_size_y))
+                    self.shades.insert(0,e)
+        self.previous_locations.insert(0, (self.x, self.y))
 
     def turn(self):
         """Make ball to circle in oposite direction"""
