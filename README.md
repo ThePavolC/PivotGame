@@ -16,4 +16,6 @@ sudo apt-get install python kivy
 python pivot.py
 ~~~
 
+![screenshot](pivot_screenshot.png)
+
 [pivot-game]: https://play.google.com/store/apps/details?id=com.NVS.pivot
